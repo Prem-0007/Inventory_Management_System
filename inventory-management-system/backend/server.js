@@ -17,7 +17,11 @@ const app = express();
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',')
   : '*';
-app.use(cors({ origin: allowedOrigins }));
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET','POST','PUT','DELETE','PATCH'],
+  credentials: true
+}));
 app.use(express.json());
 app.get('/', (req,res) => res.json({ hello: 'prem'}));
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
