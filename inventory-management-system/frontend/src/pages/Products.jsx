@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import Layout from '../components/Layout';
+import Reveal from '../components/Reveal';
 
 const emptyForm = { name: '', sku: '', category: '', price: '', quantity: '', lowStockThreshold: '', supplier: '' };
 
@@ -14,6 +15,7 @@ const Products = () => {
   const [stockModal, setStockModal] = useState(null);
   const [stockAmount, setStockAmount] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const loadProducts = async (q = '') => {
     const { data } = await api.get('/products', { params: q ? { search: q } : {} });
@@ -26,8 +28,7 @@ const Products = () => {
   };
 
   useEffect(() => {
-    loadProducts();
-    loadSuppliers();
+    Promise.all([loadProducts(), loadSuppliers()]).finally(() => setLoading(false));
   }, []);
 
   const handleSearch = (e) => {
@@ -36,7 +37,11 @@ const Products = () => {
   };
 
   const openCreate = () => {
-    setForm(emptyForm);
+    if (suppliers.length === 0) {
+      setError('Add a supplier before creating a product');
+      return;
+    }
+    setForm({ ...emptyForm, supplier: suppliers[0]._id });
     setEditingId(null);
     setShowForm(true);
     setError('');
@@ -50,7 +55,7 @@ const Products = () => {
       price: p.price,
       quantity: p.quantity,
       lowStockThreshold: p.lowStockThreshold,
-      supplier: p.supplier?._id || ''
+      supplier: p.supplier?._id || (suppliers[0]?._id ?? '')
     });
     setEditingId(p._id);
     setShowForm(true);
@@ -60,6 +65,10 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (!form.supplier) {
+      setError('Please select a supplier');
+      return;
+    }
     try {
       const payload = {
         ...form,
@@ -107,6 +116,8 @@ const Products = () => {
         <button onClick={openCreate}>+ Add Product</button>
       </div>
 
+      {error && !showForm && <div className="error-msg">{error}</div>}
+
       <input
         className="search-input"
         placeholder="Search by name or SKU..."
@@ -114,40 +125,50 @@ const Products = () => {
         onChange={handleSearch}
       />
 
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>SKU</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Supplier</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => (
-            <tr key={p._id} className={p.quantity <= p.lowStockThreshold ? 'low-stock-row' : ''}>
-              <td>{p.name}</td>
-              <td>{p.sku}</td>
-              <td>{p.category}</td>
-              <td>₹{p.price}</td>
-              <td>{p.quantity}</td>
-              <td>{p.supplier?.name || '-'}</td>
-              <td className="actions">
-                <button onClick={() => setStockModal(p)}>Stock</button>
-                <button onClick={() => openEdit(p)}>Edit</button>
-                <button className="danger" onClick={() => handleDelete(p._id)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Reveal>
+        <div className="glass" style={{ overflow: 'hidden' }}>
+          {loading ? (
+            <div className="empty-state">Loading products...</div>
+          ) : products.length === 0 ? (
+            <div className="empty-state">No products yet. Add your first product to get started.</div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Supplier</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p._id} className={p.quantity <= p.lowStockThreshold ? 'low-stock-row' : ''}>
+                    <td>{p.name}</td>
+                    <td>{p.sku}</td>
+                    <td>{p.category}</td>
+                    <td>₹{p.price}</td>
+                    <td>{p.quantity}</td>
+                    <td>{p.supplier?.name || '-'}</td>
+                    <td className="actions">
+                      <button onClick={() => setStockModal(p)}>Stock</button>
+                      <button className="secondary" onClick={() => openEdit(p)}>Edit</button>
+                      <button className="danger" onClick={() => handleDelete(p._id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Reveal>
 
       {showForm && (
         <div className="modal-overlay">
-          <form className="modal-card" onSubmit={handleSubmit}>
+          <form className="modal-card glass" onSubmit={handleSubmit}>
             <h2>{editingId ? 'Edit Product' : 'Add Product'}</h2>
             {error && <div className="error-msg">{error}</div>}
             <label>Name</label>
@@ -163,15 +184,18 @@ const Products = () => {
             <label>Low Stock Threshold</label>
             <input type="number" min="0" value={form.lowStockThreshold} onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })} />
             <label>Supplier</label>
-            <select value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} required>
-              <option value="">Select supplier</option>
-              {suppliers.map((s) => (
-                <option key={s._id} value={s._id}>{s.name}</option>
-              ))}
-            </select>
+            {suppliers.length === 0 ? (
+              <p className="field-warning">No suppliers found. Add a supplier first, then come back here.</p>
+            ) : (
+              <select value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} required>
+                {suppliers.map((s) => (
+                  <option key={s._id} value={s._id}>{s.name}</option>
+                ))}
+              </select>
+            )}
             <div className="modal-actions">
               <button type="button" className="secondary" onClick={() => setShowForm(false)}>Cancel</button>
-              <button type="submit">Save</button>
+              <button type="submit" disabled={suppliers.length === 0}>Save</button>
             </div>
           </form>
         </div>
@@ -179,7 +203,7 @@ const Products = () => {
 
       {stockModal && (
         <div className="modal-overlay">
-          <div className="modal-card">
+          <div className="modal-card glass">
             <h2>Adjust Stock — {stockModal.name}</h2>
             <p>Current quantity: {stockModal.quantity}</p>
             <label>Amount</label>
