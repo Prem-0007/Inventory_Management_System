@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const links = [
   { to: '/', label: 'Dashboard' },
@@ -10,17 +11,20 @@ const links = [
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <h2 className="brand">IMS</h2>
+      <aside className="sidebar glass">
+        <div className="brand-row">
+          <span className="brand">IMS</span>
+        </div>
         <nav>
           {links.map((link) => (
             <NavLink
@@ -39,7 +43,14 @@ const Layout = ({ children }) => {
           <button onClick={handleLogout} className="logout-btn">Logout</button>
         </div>
       </aside>
-      <main className="content">{children}</main>
+      <main className="content">
+        <div className="topbar">
+          <button className="icon-btn" onClick={toggleTheme} title="Toggle theme">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
+        {children}
+      </main>
     </div>
   );
 };
