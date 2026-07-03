@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import Layout from '../components/Layout';
+import Reveal from '../components/Reveal';
 
 const emptyForm = { name: '', email: '', phone: '', address: '' };
 
@@ -67,35 +68,43 @@ const Suppliers = () => {
         <button onClick={openCreate}>+ Add Supplier</button>
       </div>
 
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {suppliers.map((s) => (
-            <tr key={s._id}>
-              <td>{s.name}</td>
-              <td>{s.email}</td>
-              <td>{s.phone}</td>
-              <td>{s.address}</td>
-              <td className="actions">
-                <button onClick={() => openEdit(s)}>Edit</button>
-                <button className="danger" onClick={() => handleDelete(s._id)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Reveal>
+        <div className="glass" style={{ overflow: 'hidden' }}>
+          {suppliers.length === 0 ? (
+            <div className="empty-state">No suppliers yet. Add your first supplier to get started.</div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((s) => (
+                  <tr key={s._id}>
+                    <td>{s.name}</td>
+                    <td>{s.email}</td>
+                    <td>{s.phone}</td>
+                    <td>{s.address}</td>
+                    <td className="actions">
+                      <button className="secondary" onClick={() => openEdit(s)}>Edit</button>
+                      <button className="danger" onClick={() => handleDelete(s._id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Reveal>
 
       {showForm && (
         <div className="modal-overlay">
-          <form className="modal-card" onSubmit={handleSubmit}>
+          <form className="modal-card glass" onSubmit={handleSubmit}>
             <h2>{editingId ? 'Edit Supplier' : 'Add Supplier'}</h2>
             {error && <div className="error-msg">{error}</div>}
             <label>Name</label>
