@@ -71,7 +71,8 @@ const Dashboard = () => {
           {summary.recentLogs.length === 0 ? (
             <div className="empty-state">No activity yet.</div>
           ) : (
-            <table className="data-table">
+          <div className="table-scroll">
+<table className="data-table">
               <thead>
                 <tr>
                   <th>Product</th>
@@ -97,6 +98,7 @@ const Dashboard = () => {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </div>
       </Reveal>
