@@ -73,7 +73,8 @@ const Suppliers = () => {
           {suppliers.length === 0 ? (
             <div className="empty-state">No suppliers yet. Add your first supplier to get started.</div>
           ) : (
-            <table className="data-table">
+           <div className="table-scroll">
+      <table className="data-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -98,6 +99,7 @@ const Suppliers = () => {
                 ))}
               </tbody>
             </table>
+           </div>
           )}
         </div>
       </Reveal>
