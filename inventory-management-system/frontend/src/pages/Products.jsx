@@ -132,7 +132,8 @@ const Products = () => {
           ) : products.length === 0 ? (
             <div className="empty-state">No products yet. Add your first product to get started.</div>
           ) : (
-            <table className="data-table">
+            <div className="table-scroll">
+          <table className="data-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -162,6 +163,7 @@ const Products = () => {
                 ))}
               </tbody>
             </table>
+           </div>
           )}
         </div>
       </Reveal>
