@@ -24,6 +24,7 @@ const Reports = () => {
           {lowStock.length === 0 ? (
             <div className="empty-state">No low stock items.</div>
           ) : (
+            <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr><th>Product</th><th>SKU</th><th>Quantity</th><th>Threshold</th><th>Supplier</th></tr>
@@ -40,6 +41,7 @@ const Reports = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </Reveal>
@@ -50,6 +52,7 @@ const Reports = () => {
           {productSummary.length === 0 ? (
             <div className="empty-state">No products yet.</div>
           ) : (
+            <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr><th>Category</th><th>Products</th><th>Total Quantity</th><th>Total Value</th></tr>
@@ -65,6 +68,7 @@ const Reports = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </Reveal>
@@ -75,6 +79,7 @@ const Reports = () => {
           {supplierSummary.length === 0 ? (
             <div className="empty-state">No suppliers yet.</div>
           ) : (
+            <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr><th>Supplier</th><th>Products</th><th>Total Quantity</th><th>Total Value</th></tr>
@@ -90,6 +95,7 @@ const Reports = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </Reveal>
